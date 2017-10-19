@@ -15,7 +15,7 @@ DOCKER_SHELL_TTY := $(DOCKER_COMPOSE) exec $(DOCKER_SERVICE) /bin/bash
 
 DOCKER_IMAGE_NAME := $(PROJECT_NAME)
 # Override DOCKER_REGISTRY in CI to reflect true image registry
-DOCKER_REGISTRY   ?= 881638663441.dkr.ecr.us-east-1.amazonaws.com
+DOCKER_REGISTRY   ?= ACCOUNT.dkr.ecr.us-east-1.amazonaws.com
 
 DOCKER_TAG_LOCAL_VERSION  := $(DOCKER_IMAGE_NAME):$(VERSION)
 DOCKER_TAG_LOCAL_LATEST   := $(DOCKER_IMAGE_NAME):latest
