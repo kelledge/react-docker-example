@@ -3,6 +3,7 @@ export ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 PROJECT_NAME := device-dashboard
 
 GIT_COMMIT   := $(shell git rev-parse --short HEAD)
+GIT_DIRTY    := $(shell test -n "`git status --porcelain`" && echo "dirty" || echo "clean")
 VERSION      ?= $(GIT_COMMIT)
 
 DOCKER_SERVICE   := dev
@@ -38,9 +39,12 @@ help:
 
 .PHONY: info
 info:
-	@echo "Project:  $(PROJECT_NAME)"
-	@echo "Version:  $(VERSION)"
-	@echo "Registry: $(DOCKER_REGISTRY)"
+	@echo "Project:         $(PROJECT_NAME)"
+	@echo "Version:         $(VERSION)"
+	@echo "Git Commit:      $(GIT_COMMIT)"
+	@echo "Git Tree State:  $(GIT_DIRTY)"
+	@echo "Docker Image:    $(DOCKER_TAG_LOCAL_VERSION)"
+	@echo "Docker Registry: $(DOCKER_REGISTRY)"
 
 # Setup docker environment
 .PHONY: up
@@ -116,7 +120,7 @@ package:
 # Run the package
 .PHONY: run
 run:
-	docker run --rm -it -p 8000:8000 $(DOCKER_TAG_LOCAL_LATEST)
+	docker run --rm -it -p 8080:80 $(DOCKER_TAG_LOCAL_LATEST)
 
 .PHONEY: deps
 deps: SHELL := $(DOCKER_SHELL)
