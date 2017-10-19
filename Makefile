@@ -4,6 +4,8 @@ PROJECT_NAME := device-dashboard
 
 GIT_COMMIT   := $(shell git rev-parse --short HEAD)
 GIT_DIRTY    := $(shell test -n "`git status --porcelain`" && echo "dirty" || echo "clean")
+
+# Override the VERSION envar in CI to reflect build
 VERSION      ?= $(GIT_COMMIT)
 
 DOCKER_SERVICE   := dev
@@ -12,6 +14,7 @@ DOCKER_SHELL     := $(DOCKER_COMPOSE) exec -T $(DOCKER_SERVICE) /bin/bash
 DOCKER_SHELL_TTY := $(DOCKER_COMPOSE) exec $(DOCKER_SERVICE) /bin/bash
 
 DOCKER_IMAGE_NAME := $(PROJECT_NAME)
+# Override DOCKER_REGISTRY in CI to reflect true image registry
 DOCKER_REGISTRY   ?= 881638663441.dkr.ecr.us-east-1.amazonaws.com
 
 DOCKER_TAG_LOCAL_VERSION  := $(DOCKER_IMAGE_NAME):$(VERSION)
@@ -97,7 +100,8 @@ test: deps test-unit
 test-unit: SHELL := $(DOCKER_SHELL)
 test-unit:
 	CI=true yarn test
-	@echo "Collect test results in to a predictable location"
+	@echo "Edit this target to collect test results in to a predictable location."
+	@echo "It should also render test results in JUnit format."
 
 # Build artifacts
 .PHONY: build
@@ -114,12 +118,13 @@ clean:
 
 # Package artifacts
 .PHONY: package
-package:
+package: build
 	docker build -t $(DOCKER_TAG_LOCAL_VERSION) -t $(DOCKER_TAG_LOCAL_LATEST) .
 
-# Run the package
+# Run the package.
 .PHONY: run
 run:
+	@echo "Running packaged docker image. Visit http://localhost:8080 to view."
 	docker run --rm -it -p 8080:80 $(DOCKER_TAG_LOCAL_LATEST)
 
 .PHONEY: deps
@@ -136,7 +141,7 @@ publish: login
 	docker push $(DOCKER_TAG_REMOTE_VERSION)
 
 .PHONY: login
-login:
+login-ecr:
 	eval $$(aws ecr get-login)
 
 .PHONY: deploy
